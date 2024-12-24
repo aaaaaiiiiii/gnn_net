@@ -9,7 +9,7 @@ from model import SDRegressionModel
 from load_data import load_data
 
 
-num_epochs = 1000
+num_epochs = 200
 
 # --- ハイパーパラメータ ---
 hidden_channels = 121
@@ -67,3 +67,6 @@ with torch.no_grad():
         out = model(data.x, data.edge_index, data.sd_index)
         loss = criterion(out, data.y)
     print(f'Test Loss: {loss.item()}')
+
+# --- モデルの保存 ---
+torch.save(model.state_dict(), f'{input}/model.pth')
