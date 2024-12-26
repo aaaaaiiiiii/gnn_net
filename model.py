@@ -31,6 +31,5 @@ class SDRegressionModel(torch.nn.Module):
 
     def forward(self, x, edge_index, sd_index):
         z = self.gnn(x, edge_index)
-        print(z.shape)
         out = self.sd_fc(z, sd_index)
         return out
