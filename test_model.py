@@ -12,7 +12,7 @@ model_file = f'{input}/model.pth'
 # データの読み込み
 train_data_set, test_data_set = load_data(pkl_file)
 
-test_data_set = test_data_set[0]
+test_data_set = test_data_set[1000]
 
 # --- モデルの定義 ---
 model = SDRegressionModel(hidden_channels=121)
@@ -25,4 +25,4 @@ with torch.no_grad():
     data = test_data_set
     out = model(data.x, data.edge_index, data.sd_index)
     for i in range(len(out)):
-        print(f'{data.y[i]} {out[i]}')
+        print(f'{data.y[i]} {out[i]} {round(out[i].item()) == data.y[i]}')
