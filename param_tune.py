@@ -6,16 +6,23 @@ import random
 from torch_geometric.loader import DataLoader
 from model import SDRegressionModel
 from load_data import load_data
+import sys
 
 num_epochs = 50
 
 # CUDAの設定
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-input = input('base_dir: ')
-pkl_file = f'{input}/{input}.pkl'
+print('base_dir: ', file=sys.stderr, end='')
+input = input()
+train_pkl_file = f'{input}/train.pkl'
+test_pkl_file = f'{input}/test.pkl'
 
-train_data_set, test_data_set = load_data(pkl_file)
+# データの読み込み
+print('loading train data...', file=sys.stderr)
+train_data_set = load_data(train_pkl_file)
+print('loading test data...', file=sys.stderr)
+test_data_set = load_data(test_pkl_file)
 
 def objective(trial):
     hidden_channels = trial.suggest_int('hidden_channels', 16, 128)
