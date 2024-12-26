@@ -3,10 +3,7 @@ import torch
 def load_data(pkl_file):
     with open(pkl_file, 'rb') as f:
         data = torch.load(f, weights_only=False)
-        
-        train_data_set = data['train']
-        test_data_set = data['test']
-        return train_data_set, test_data_set
+        return data
 
 if __name__ == '__main__':
     dir = input('base_dir: ')

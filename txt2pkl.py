@@ -4,6 +4,7 @@ import pickle
 import torch
 from torch_geometric.data import Data
 import random
+from tqdm import tqdm
 
 def adj_matrix_to_edge_index(adj_matrix):
     edge_index = []
@@ -94,24 +95,27 @@ def create_pkl(dir, save_path):
 
     edge_index = topology_file_to_edge_index(adj_matrix_file_path)
 
-    for file in os.listdir(train_dir):
+    for file in tqdm(os.listdir(train_dir), desc="Processing train files"):
         file_path = f'{train_dir}/{file}'
         geo_data = file_to_data(file_path, edge_index)
         train_data_set.append(geo_data)
 
-    for file in os.listdir(test_dir):
+    for file in tqdm(os.listdir(test_dir), desc="Processing test files"):
         file_path = f'{test_dir}/{file}'
         geo_data = file_to_data(file_path, edge_index)
         test_data_set.append(geo_data)
 
-    data_set = {'train': train_data_set, 'test': test_data_set}
+    with open(f'{dir}/train.pkl', 'wb') as f:
+        torch.save(train_data_set, f)
+        print(f'saved: {dir}/train.pkl')
 
-    with open(save_path, 'wb') as f:
-        torch.save(data_set, f)
-        print(f'saved: {save_path}')
+    with open(f'{dir}/test.pkl', 'wb') as f:
+        torch.save(test_data_set, f)
+        print(f'saved: {dir}/test.pkl')
 
-    for key, value in data_set.items():
-        print(f'{key}: {len(value)}')
+    print(f'num of train data: {len(train_data_set)}')
+    print(f'num of test data: {len(test_data_set)}')
+
 
 if __name__ == '__main__':
     base_dir = input('base_dir: ')
