@@ -8,15 +8,18 @@ from torch_geometric.loader import DataLoader
 from model import SDRegressionModel
 from load_data import load_data
 
-
+# --- 設定 ---
 num_epochs = 200
+num_node_features = 3
+
 
 # --- ハイパーパラメータ ---
 hidden_channels = 121
-# num_heads = 6
+SAGE_num_layers = 3
+connection_channels = 121
+dropout = 0.3
 lr = 0.001882383
 batch_size = 128
-sd_batch_size = 32
 
 # CUDAの設定
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -26,16 +29,14 @@ input = input('base_dir: ')
 pkl_file = f'{input}/{input}.pkl'
 
 # データの読み込み
-
 train_data_set, test_data_set = load_data(pkl_file)
 
 # PyTorch Geometric用 DataLoaderの作成
-
 train_loader = DataLoader(train_data_set, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_data_set, batch_size=batch_size, shuffle=False)
 
 # --- モデルの定義 ---
-model = SDRegressionModel(hidden_channels=hidden_channels).to(device)
+model = SDRegressionModel(in_channels=num_node_features, hidden_channels=hidden_channels, SAGE_num_layers=SAGE_num_layers, connection_channels=connection_channels, dropout=dropout).to(device)
 
 # --- 学習設定 ---
 optimizer = optim.Adam(model.parameters(), lr=lr)

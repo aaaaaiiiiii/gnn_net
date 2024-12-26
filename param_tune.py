@@ -7,7 +7,9 @@ from torch_geometric.loader import DataLoader
 from model import SDRegressionModel
 from load_data import load_data
 
+# --- 設定 ---
 num_epochs = 50
+num_node_features = 3
 
 # CUDAの設定
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -19,13 +21,14 @@ train_data_set, test_data_set = load_data(pkl_file)
 
 def objective(trial):
     hidden_channels = trial.suggest_int('hidden_channels', 16, 128)
-    # num_heads = trial.suggest_int('num_heads', 1, 8)
+    connection_channels = trial.suggest_int('connection_channels', 16, 128)
+    SAGE_num_layers = trial.suggest_int('SAGE_num_layers', 2, 5)
+    dropout = trial.suggest_float('dropout', 0.1, 0.5)
     lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
-    batch_size = trial.suggest_categorical('batch_size', [128, 256, 512, 1024])
-    # sd_batch_size = trial.suggest_categorical('sd_batch_size', [64, 128, 256, 512])
+    batch_size = trial.suggest_categorical('batch_size', [64, 128, 256, 512, 1024])
     
     # Optunaによるハイパーパラメータチューニング
-    model = SDRegressionModel(hidden_channels=hidden_channels).to(device)
+    model = SDRegressionModel(in_channels=num_node_features, hidden_channels=hidden_channels, SAGE_num_layers=SAGE_num_layers, connection_channels=connection_channels, dropout=dropout).to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
 
@@ -58,7 +61,7 @@ def objective(trial):
     return total_loss / len(test_loader)
 
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_trials=100)
+study.optimize(objective, n_trials=1000)
 
 print('Best trial:')
 trial = study.best_trial
