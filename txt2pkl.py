@@ -1,9 +1,7 @@
 import numpy as np
 import os
-import pickle
 import torch
 from torch_geometric.data import Data
-import random
 from tqdm import tqdm
 
 def adj_matrix_to_edge_index(adj_matrix):
@@ -31,15 +29,16 @@ def file_to_data(file_path, edge_index):
     node_feature1 = np.array(lines[0].strip().split(','), dtype=int).reshape(-1, 1)
     node_feature2 = np.array(lines[1].strip().split(','), dtype=int).reshape(-1, 1)
     node_feature3 = np.array(lines[2].strip().split(','), dtype=int).reshape(-1, 1)
+    node_feature4 = np.array(lines[3].strip().split(','), dtype=int).reshape(-1, 1)
 
 
-    node_feature = np.concatenate((node_feature1, node_feature2, node_feature3), axis=1)
+    node_feature = np.concatenate((node_feature1, node_feature2, node_feature3, node_feature4), axis=1)
     
-    sd_index_src = np.array(lines[3].strip().split(','), dtype=int)
-    sd_index_dst = np.array(lines[4].strip().split(','), dtype=int)
+    sd_index_src = np.array(lines[4].strip().split(','), dtype=int)
+    sd_index_dst = np.array(lines[5].strip().split(','), dtype=int)
     sd_index = np.stack((sd_index_src, sd_index_dst), axis=0)
     
-    y = np.array(lines[5].strip().split(','), dtype=int)
+    y = np.array(lines[6].strip().split(','), dtype=int)
 
     node_feature = torch.tensor(node_feature, dtype=torch.float32)
     edge_index = edge_index.clone().detach()

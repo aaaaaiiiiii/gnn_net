@@ -10,7 +10,7 @@ import sys
 
 # --- 設定 ---
 num_epochs = 50
-num_node_features = 3
+num_node_features = 4
 
 # CUDAの設定
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -30,12 +30,19 @@ def objective(trial):
     hidden_channels = trial.suggest_int('hidden_channels', 16, 128)
     connection_channels = trial.suggest_int('connection_channels', 16, 128)
     SAGE_num_layers = trial.suggest_int('SAGE_num_layers', 2, 5)
-    dropout = trial.suggest_float('dropout', 0.1, 0.5)
+    fc_num_layers = trial.suggest_int('fc_num_layers', 2, 5)
     lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
     batch_size = trial.suggest_categorical('batch_size', [64, 128, 256, 512, 1024])
     
     # Optunaによるハイパーパラメータチューニング
-    model = SDRegressionModel(in_channels=num_node_features, hidden_channels=hidden_channels, SAGE_num_layers=SAGE_num_layers, connection_channels=connection_channels, dropout=dropout).to(device)
+    model = SDRegressionModel(
+        in_channels=num_node_features,
+        hidden_channels=hidden_channels,
+        SAGE_num_layers=SAGE_num_layers,
+        connection_channels=connection_channels,
+        fc_num_layers=fc_num_layers
+    ).to(device)
+
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
 

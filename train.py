@@ -2,28 +2,40 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import sys
-import random
 from torch_geometric.loader import DataLoader
 
 from model import SDRegressionModel
 from load_data import load_data
 
-# --- 設定 ---
-num_epochs = 200
-num_node_features = 3
-
-
-# --- ハイパーパラメータ ---
-hidden_channels = 121
-SAGE_num_layers = 3
-connection_channels = 121
-dropout = 0.3
-lr = 0.001882383
-batch_size = 128
-
 # CUDAの設定
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # device = torch.device('cpu')
+
+# --- 設定 ---
+num_epochs = 200
+num_node_features = 4
+
+# --- ハイパーパラメータ ---
+hidden_channels = 108
+SAGE_num_layers = 5
+connection_channels = 90
+lr = 0.00034
+batch_size = 64
+fc_num_layers = 3
+
+# --- モデルの定義 ---
+model = SDRegressionModel(
+    in_channels=num_node_features,
+    hidden_channels=hidden_channels,
+    SAGE_num_layers=SAGE_num_layers,
+    connection_channels=connection_channels,
+    fc_num_layers=fc_num_layers
+).to(device)
+
+# --- 学習設定 ---
+optimizer = optim.Adam(model.parameters(), lr=lr)
+criterion = nn.MSELoss()
+
 
 print('base_dir: ', file=sys.stderr, end='')
 input = input()
@@ -40,12 +52,6 @@ test_data_set = load_data(test_pkl_file)
 train_loader = DataLoader(train_data_set, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_data_set, batch_size=batch_size, shuffle=False)
 
-# --- モデルの定義 ---
-model = SDRegressionModel(in_channels=num_node_features, hidden_channels=hidden_channels, SAGE_num_layers=SAGE_num_layers, connection_channels=connection_channels, dropout=dropout).to(device)
-
-# --- 学習設定 ---
-optimizer = optim.Adam(model.parameters(), lr=lr)
-criterion = nn.MSELoss()
 
 # --- 学習 ---
 model.train()

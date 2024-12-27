@@ -6,16 +6,24 @@ from model import SDRegressionModel
 
 input = input('base_dir: ')
 
-pkl_file = f'{input}/{input}.pkl'
+pkl_file = f'{input}/test.pkl'
 model_file = f'{input}/model.pth'
 
 # データの読み込み
-train_data_set, test_data_set = load_data(pkl_file)
+test_data_set = load_data(pkl_file)
 
 test_data_set = test_data_set[1000]
 
 # --- モデルの定義 ---
-model = SDRegressionModel(hidden_channels=121)
+hidden_channels = 108
+SAGE_num_layers = 5
+connection_channels = 90
+dropout = 0.15
+lr = 0.00034
+batch_size = 64
+fc_num_layers = 3
+
+model = SDRegressionModel(in_channels=4, hidden_channels=hidden_channels, SAGE_num_layers=SAGE_num_layers, connection_channels=connection_channels, fc_num_layers=fc_num_layers)
 model.load_state_dict(torch.load(model_file))
 
 # --- テスト ---
