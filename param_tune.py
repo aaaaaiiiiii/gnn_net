@@ -9,7 +9,7 @@ from load_data import load_data
 import sys
 
 # --- 設定 ---
-num_epochs = 50
+num_epochs = 20
 num_node_features = 4
 
 # CUDAの設定
@@ -27,12 +27,12 @@ print('loading test data...', file=sys.stderr)
 test_data_set = load_data(test_pkl_file)
 
 def objective(trial):
-    hidden_channels = trial.suggest_int('hidden_channels', 16, 128)
-    connection_channels = trial.suggest_int('connection_channels', 16, 128)
-    SAGE_num_layers = trial.suggest_int('SAGE_num_layers', 2, 5)
-    fc_num_layers = trial.suggest_int('fc_num_layers', 2, 5)
-    lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
-    batch_size = trial.suggest_categorical('batch_size', [64, 128, 256, 512, 1024])
+    hidden_channels = trial.suggest_int('hidden_channels', 64, 128)
+    connection_channels = trial.suggest_int('connection_channels', 64, 128)
+    SAGE_num_layers = trial.suggest_int('SAGE_num_layers', 8, 16)
+    fc_num_layers = trial.suggest_int('fc_num_layers', 3, 7)
+    lr = trial.suggest_float('lr', 1e-3, 1e-2, log=True)
+    batch_size = trial.suggest_categorical('batch_size', [16, 32, 64])
     
     # Optunaによるハイパーパラメータチューニング
     model = SDRegressionModel(
