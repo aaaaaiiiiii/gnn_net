@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import sys
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 from model import SDRegressionModel
 from load_data import load_data
@@ -12,16 +13,26 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # device = torch.device('cpu')
 
 # --- 設定 ---
-num_epochs = 200
+num_epochs = 2000
 num_node_features = 4
 
+# [I 2024-12-29 10:52:41,203] Trial 25 finished with value: 0.012109582475949234 and parameters: {
+#   'hidden_channels': 121, 
+#   'connection_channels': 110, 
+#   'SAGE_num_layers': 9, 
+#   'fc_num_layers': 5, 
+#   'lr': 0.00041098201353148003, 
+#   'batch_size': 16
+# }. 
+# Best is trial 25 with value: 0.012109582475949234.
+
 # --- ハイパーパラメータ ---
-hidden_channels = 108
-SAGE_num_layers = 5
-connection_channels = 90
-lr = 0.00034
-batch_size = 64
-fc_num_layers = 3
+hidden_channels = 121
+connection_channels = 110
+SAGE_num_layers = 9
+fc_num_layers = 5
+lr = 0.00041098201353148003
+batch_size = 16
 
 # --- モデルの定義 ---
 model = SDRegressionModel(
@@ -55,9 +66,9 @@ test_loader = DataLoader(test_data_set, batch_size=batch_size, shuffle=False)
 
 # --- 学習 ---
 model.train()
-for epoch in range(num_epochs):
+for epoch in tqdm(range(num_epochs), desc='Epochs'):
     total_loss = 0
-    for data in train_loader:
+    for data in tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs}', leave=False):
         data = data.to(device)
 
         optimizer.zero_grad()
@@ -70,6 +81,8 @@ for epoch in range(num_epochs):
         total_loss += loss.item()
     print(f'Epoch: {epoch}, Loss: {total_loss / len(train_loader)}')
     sys.stdout.flush()
+    # --- モデルの保存 ---
+    torch.save(model.state_dict(), f'{input}/model.pth')
 
 # --- テスト ---
 model.eval()
@@ -79,6 +92,3 @@ with torch.no_grad():
         out = model(data.x, data.edge_index, data.sd_index)
         loss = criterion(out, data.y)
     print(f'Test Loss: {loss.item()}')
-
-# --- モデルの保存 ---
-torch.save(model.state_dict(), f'{input}/model.pth')
